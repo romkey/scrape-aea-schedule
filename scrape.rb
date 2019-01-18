@@ -3,11 +3,12 @@ require 'nokogiri'
 require 'open-uri'
 require 'icalendar'
 require 'date'
+require 'icalendar/tzinfo'
 require 'pp'
 
 URL = 'https://aneventapart.com/event/seattle-2018'
 STARTING_DAY = Date.new(2018, 4, 2)
-TIMEZONE = "-0900"
+TIMEZONE = 'America/Los Angeles'
 FILENAME = './seattle-2018.html'
 OUTPUT_FILENAME = 'aeasea2018.ics'
 
@@ -80,6 +81,10 @@ else
 end
 
 cal = Icalendar::Calendar.new
+
+tz = TZInfo::Timezone.get tzid
+timezone = tz.ical_timezone event_start
+cal.add_timezone timezone
 
 find_sessions(html).each do |session|
   next unless session.name
