@@ -6,16 +6,17 @@ require 'date'
 require 'icalendar/tzinfo'
 require 'pp'
 
-URL = 'https://aneventapart.com/event/seattle-2018'
-STARTING_DAY = Date.new(2018, 4, 2)
+URL = 'https://aneventapart.com/event/seattle-2019'
+STARTING_DAY = Date.new(2019, 3, 4)
 TIMEZONE = 'America/Los Angeles'
-FILENAME = './seattle-2018.html'
-OUTPUT_FILENAME = 'aeasea2018.ics'
+FILENAME = './seattle-2019.html'
+OUTPUT_FILENAME = 'aeasea2019.ics'
 
 def find_sessions(html)
   parsed = Nokogiri::HTML(html)
   
-  li_s = parsed.css('.single-session')
+  #  li_s = parsed.css('.has-session-info')
+  li_s = parsed.css('.sessions li')
 
   session_struct = Struct.new :name, :speaker, :speaker_link, :speaker_org, :start, :end, :description
 
@@ -39,7 +40,6 @@ def find_sessions(html)
     end
     session.end = DateTime.parse "#{current_day} #{times[1]} #{TIMEZONE}"
 
-
     speaker = li.css('.speaker-link')[0]
     if speaker
       session.speaker = speaker.text
@@ -51,15 +51,20 @@ def find_sessions(html)
       session.speaker_org = org.text
     end
 
-    name = li.css('h2.toggled')[0]
+    name = li.css('h4')[0]
     if name
       session.name = name.text
-      if session.name == 'Lunch'
+      puts "!#{session.name}!"
+
+      if ['Lunch ', 'Breakfast', 'Morning Welcome', 'Attendee Check-in/Badge Pick-up', 'Happy Hour'].include?(session.name) || session.name.include?('Special Screening')
+        puts "got it #{session.name}!"
         session.speaker = ''
         session.speaker_org = ''
         session.speaker_link = ''
       end
     end
+
+    puts '>>> Lunch <<<' if session.name == 'Lunch '
 
     next unless session.name && session.speaker
 
@@ -82,8 +87,8 @@ end
 
 cal = Icalendar::Calendar.new
 
-tz = TZInfo::Timezone.get tzid
-timezone = tz.ical_timezone event_start
+tz = TZInfo::Timezone.get 'America/Los_Angeles'
+timezone = tz.ical_timezone Time.now
 cal.add_timezone timezone
 
 find_sessions(html).each do |session|
