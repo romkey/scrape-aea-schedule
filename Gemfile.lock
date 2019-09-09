@@ -14,7 +14,7 @@ GEM
     ice_cube (0.16.3)
     mini_portile2 (2.4.0)
     minitest (5.11.3)
-    nokogiri (1.10.1)
+    nokogiri (1.10.4)
       mini_portile2 (~> 2.4.0)
     thread_safe (0.3.6)
     tzinfo (1.2.5)
